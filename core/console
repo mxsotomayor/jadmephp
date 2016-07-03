@@ -1,0 +1,86 @@
+
+<?php
+define('DS', DIRECTORY_SEPARATOR);
+define('ROOT', dirname(dirname(__FILE__)));
+define('_CORE_', ROOT.DS.'core');
+define('_ERROR_', _CORE_.DS.'Errors');
+define('_CONFIG_', ROOT.DS.'config');
+
+error_reporting(E_ALL);
+ini_set('display_errors','On');
+ini_set('log_errors', 'On');
+ini_set('error_log', "error.log");
+
+
+
+require_once 'config/config.php';
+
+
+
+function Init()
+{
+ echo "===========================================".PHP_EOL;
+ echo "================ JADME.BIN ================".PHP_EOL;
+ echo "===========================================".PHP_EOL;
+ echo PHP_EOL;
+ echo "Listado de comandos disponibles.".PHP_EOL;
+ echo PHP_EOL;
+ echo "   sdb                   Synchornize Dababase.".PHP_EOL;
+ echo "   chkrouting            Check status of routing file.".PHP_EOL;
+ echo PHP_EOL;
+ echo "Escriba la opcion que desea ejecutar> ";
+ $handle = fopen ("php://stdin","r");
+ $line = fgets($handle);
+    
+    /*prueba*/
+     $gdb = new GenerateDb();
+     $gdb->mainMenu();
+
+ if(trim($line) == "s"){
+    /*original*/
+     $gdb = new GenerateDb();
+     $gdb->mainMenu();
+ }else{
+    echo "Error: Instruccion desconocida".PHP_EOL;
+    echo PHP_EOL;
+    Init();
+}
+
+}
+
+
+function __autoload($clssName)
+{
+    if(file_exists(_CORE_ . DS . "_Console_" . DS . ucwords($clssName) . ".php"))
+        require_once _CORE_ . DS . "_Console_" . DS . ucwords($clssName) . ".php";
+
+    if (file_exists(ROOT . DS . 'core' . DS . 'Controllers' . DS . strtolower($clssName) . '.php')) 
+        require_once(ROOT . DS . 'core' . DS . 'Controllers' . DS . strtolower($clssName) . '.php');
+
+    if ($handle = opendir(ROOT.DS."mods")) {
+    while (false !== ($file = readdir($handle))) { 
+        if ($file != "." && $file != "..") { 
+            if (file_exists(ROOT . DS . 'mods' . DS . $file .DS.'Controllers' . DS . strtolower($clssName) . '.php')) {       
+               require_once(ROOT . DS . 'mods' . DS . $file .DS.'Controllers' . DS . strtolower($clssName) . '.php');
+           }
+           if (file_exists(ROOT . DS . 'mods' . DS . $file .DS.'Entities' . DS . strtolower($clssName) . '.php')) { 
+             if (file_exists(ROOT . DS . 'mods' . DS . $file .DS.'Entities'. DS. 'Repositories' . DS . strtolower($clssName) . 'Repository.php')) {       
+              require_once(ROOT . DS . 'mods' . DS . $file .DS.'Entities'. DS. 'Repositories' . DS . strtolower($clssName) . 'Repository.php');
+            }  
+            require_once(ROOT . DS . 'mods' . DS . $file .DS.'Entities' . DS . strtolower($clssName) . '.php');
+          }
+      } 
+  }
+  closedir($handle); 
+}
+
+
+}
+
+
+Init();
+
+
+
+
+?>
